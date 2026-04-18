@@ -1,28 +1,4 @@
-name: CI
-on: [ push, pull_request ]
-jobs:
-  build-java:
-    name: Build Java
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-          cache: gradle
-      - name: Build
-        run: ./gradlew buildAll
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: java-libraries
-          path: "**/build/libs/*.jar"
-
-  # ARM64専用のビルドジョブを独立させる
-  build-arm64:
+build-arm64:
     name: Build Native (Linux ARM64)
     runs-on: ubuntu-latest
     steps:
@@ -31,14 +7,15 @@ jobs:
         with:
           submodules: recursive
 
-      # QEMUを設定してARM64環境をエミュレートできるようにする
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
-      # ARM64のコンテナ内でビルドを実行する
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Build in ARM64 Container
         run: |
-          docker run --rm -v ${{ github.workspace }}:/work -w /work arm64v8/ubuntu:22.04 /bin/bash -c "
+          docker run --rm --platform linux/arm64 -v ${{ github.workspace }}:/work -w /work arm64v8/ubuntu:22.04 /bin/bash -c "
             apt-get update && \
             apt-get install -y build-essential openjdk-17-jdk git python3 && \
             chmod +x gradlew && \
@@ -50,28 +27,3 @@ jobs:
         with:
           name: native-linux-arm64
           path: imgui-binding/build/libsNative/linux64/libimgui-moulberry90-java64.so
-
-  # 既存のx86_64向けジョブ（必要なら残す）
-  build-others:
-    name: Build Native (x86_64)
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        type: [ windows, linux ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-      - name: Build
-        run: ./gradlew imgui-binding:generateLibs -Denvs=${{ matrix.type }} -Dfreetype=false
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-${{ matrix.type }}-x64
-          path: "**/build/libsNative/**/*"
