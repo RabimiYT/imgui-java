@@ -43,6 +43,7 @@ jobs:
             apt-get update && \
             apt-get install -y build-essential openjdk-17-jdk git python3 && \
             chmod +x gradlew && \
+            export JAVA_TOOL_OPTIONS='-Dfile.encoding=UTF-8' && \
             export OS_NAME=linux && \
             export OS_ARCH=amd64 && \
             ./gradlew imgui-binding:generateLibs -Denvs=linux -Dlocal
