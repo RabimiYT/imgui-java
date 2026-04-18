@@ -43,6 +43,8 @@ jobs:
             apt-get update && \
             apt-get install -y build-essential openjdk-17-jdk git python3 && \
             chmod +x gradlew && \
+            export OS_NAME=linux && \
+            export OS_ARCH=amd64 && \
             ./gradlew imgui-binding:generateLibs -Denvs=linux -Dlocal
           "
 
@@ -50,7 +52,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: native-linux-arm64
-          path: imgui-binding/build/libsNative/linux64/libimgui-moulberry90-java64.so
+          path: "**/build/libsNative/linux64/*.so"
 
   build-others:
     name: Build Native (x86_64)
