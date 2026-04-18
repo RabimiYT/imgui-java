@@ -6,7 +6,8 @@ ext {
 
 allprojects {
     group 'imgui-java'
-    version 'git describe --tags --always'.execute().text.trim().substring(1)
+    def gitVersion = 'git describe --tags --always'.execute().text.trim()
+    version gitVersion.length() > 1 ? gitVersion.substring(1) : "0.0.0-SNAPSHOT"
 
     repositories {
         mavenCentral()
