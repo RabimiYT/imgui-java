@@ -29,12 +29,12 @@ jobs:
             imgui-binding/build/libs/*.jar
             imgui-lwjgl3/build/libs/*.jar
 
-  build-natives:
+build-natives:
     name: Build Native (${{ matrix.type }}${{ matrix.freetype && ', freetype' || ''  }})
     strategy:
       matrix:
         os: [ ubuntu-latest, macos-latest ]
-        type: [ windows, linux, macos ]
+        type: [ windows, linux, macos, linuxarm64 ] # linuxarm64 を追加
         freetype: [ true, false ]
         include:
           - type: windows
@@ -43,6 +43,9 @@ jobs:
             expected: /tmp/imgui/libsNative/linux64/libimgui-java64.so
           - type: macos
             expected: /tmp/imgui/libsNative/macosx64/libimgui-java64.dylib
+          - type: linuxarm64
+            os: ubuntu-latest
+            expected: /tmp/imgui/libsNative/linuxarm64/libimgui-java64.so 
         exclude:
           - os: ubuntu-latest
             type: macos
@@ -85,6 +88,13 @@ jobs:
           sudo ./configure --with-zlib=no --with-bzip2=no --with-png=no --with-harfbuzz=no --with-brotli=no --host=x86_64-w64-mingw32 --prefix=/usr/x86_64-w64-mingw32
           sudo make
           sudo make install
+
+      - name: Install Compilers
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt update
+          sudo apt install -y mingw-w64
+          sudo apt install -y g++-aarch64-linux-gnu binutils-aarch64-linux-gnu
 
       - name: Build
         run: ./gradlew imgui-binding:generateLibs -Denvs=${{ matrix.type }} -Dfreetype=${{ matrix.freetype }}
