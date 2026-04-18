@@ -105,7 +105,6 @@ build-natives:
           name: ${{ matrix.freetype && 'native-libraries-with-freetype' || 'native-libraries' }}
           if-no-files-found: error
           path: ${{ matrix.expected }}
-
   update-bin:
     name: Update Binaries
     if: github.ref == 'refs/heads/main' # runs only on the main branch
