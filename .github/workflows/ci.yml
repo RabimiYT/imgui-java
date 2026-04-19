@@ -53,29 +53,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: native-linux-arm64
-          path: "**/build/libsNative/linux64/*.so"
-
-  build-others:
-    name: Build Native (x86_64)
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        type: [ windows, linux ]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          java-version: 17
-          distribution: temurin
-      - name: Build
-        run: ./gradlew imgui-binding:generateLibs -Denvs=${{ matrix.type }} -Dfreetype=false
-      - name: Upload
-        uses: actions/upload-artifact@v4
-        with:
-          name: native-${{ matrix.type }}-x64
-          path: "**/build/libsNative/**/*"
+          path: |
+            **/build/libsNative/**/*.so
+            **/*.so
+          if-no-files-found: error
